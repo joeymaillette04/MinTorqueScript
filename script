@@ -1,0 +1,115 @@
+import scipy.optimize._minimize
+import numpy as np
+import math
+import matplotlib.pyplot as plt 
+
+
+def make_fig():
+    #
+    # Creating figure
+    fig = plt.figure(
+        figsize=(5, 4.2),
+        facecolor='#ffffff',
+        tight_layout=True)
+    # Adding and configuring axes
+    ax = fig.add_subplot(
+        facecolor='#ffffff',
+        )
+    ax.grid(
+    linestyle=':',
+    )
+    # Returning axes handle
+    return ax
+
+
+def lengths( points, x3, y3):
+    lengthArr = []
+    lengthArr.append( np.sqrt( (points[0]**2) + (points[1]**2) ) )
+    lengthArr.append( np.sqrt( ( points[2]- points[0] )**2 + ( points[3] - points[1] ) **2 ) )
+    lengthArr.append( np.sqrt( (x3 - points[ 2 ] )**2 + ( y3 - points[3] )**2 ) )
+    return lengthArr
+
+def mass( a, l ):
+    return a * l
+
+def force( mass ):
+    return mass * 9.81
+
+def midpoints( positions, x3, y3 ):
+    midpointArr = [ [], [], [] ]
+
+    midpointArr[0].append( positions[0]/2) 
+    midpointArr[0].append(positions[1]/2)
+
+    midpointArr[1].append( ( positions[2]-positions[0] )/2 + positions[0] )
+    midpointArr[1].append( ( positions[3]-positions[1] )/2 + positions[1] )
+
+    midpointArr[2].append( ( x3 - positions[2] )/2 + positions[2] )
+    midpointArr[2].append( ( y3 - positions[3] )/2 + positions[3] )
+
+    return midpointArr
+
+def torque( positions ):
+
+    posArray = [ 0, 0, 0, 0]
+
+    x3 = 0.75
+    y3 = 0.1
+    angle = -60
+
+    posArray[0] = positions[0]
+    posArray[1] = positions[1]
+    posArray[2] = positions[2]
+    posArray[3] = y3 - np.tan(-np.pi/3) * (positions[2]-positions[0])
+
+    print(posArray)
+    # y2 = y3 - np.tan(-np.pi/3) * (positions[2]-positions[0])
+
+    # print( posArray )
+
+    # np.append(posArray, y2, axis=None)
+
+    print( posArray )
+
+    lengthArr = lengths(posArray, x3, y3)
+
+    masses = []
+    a = 8
+    for i in range( 0, 3):
+        a /= 2
+        masses.append( mass( a, lengthArr[i] ) )
+    
+    forces=[]
+    for i in range( 0, 3 ):
+        forces.append( force(masses[i]) )
+    forces.append( force(5) )
+
+    midpointArr = midpoints( posArray, x3, y3 )
+
+    torque = 0
+
+    for i in range( 0, 3):
+        torque += ( forces[i] * midpointArr[i][0] * np.sin( np.arctan2( midpointArr[i][1], midpointArr[i][0] ) ) )
+
+    torque += forces[3] * x3 * np.sin( np.arctan2( y3, x3 ) )
+
+    make_fig()
+    xPoints = [ 0, posArray[0], posArray[2], x3 ]
+    yPoints = [ 0, posArray[1], posArray[3], y3 ]
+    print(xPoints)
+    print(yPoints)
+    plt.scatter(xPoints, yPoints)
+    plt.show()
+
+
+
+    return np.abs(torque)
+
+
+x0 = [ -0.5, 0.5, 0.5 ]
+
+res = scipy.optimize.minimize(torque, x0, method='CG', jac='3-point')
+print(res)
+
+fTorque = torque(x0)
+print(fTorque)
