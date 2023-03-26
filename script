@@ -60,17 +60,12 @@ def torque( positions ):
     posArray[0] = positions[0]
     posArray[1] = positions[1]
     posArray[2] = positions[2]
+
     posArray[3] = y3 - np.tan(-np.pi/3) * (positions[2]-positions[0])
 
-    print(posArray)
-    # y2 = y3 - np.tan(-np.pi/3) * (positions[2]-positions[0])
+    # print(posArray)
 
-    # print( posArray )
-
-    # np.append(posArray, y2, axis=None)
-
-    print( posArray )
-
+    
     lengthArr = lengths(posArray, x3, y3)
 
     masses = []
@@ -93,23 +88,21 @@ def torque( positions ):
 
     torque += forces[3] * x3 * np.sin( np.arctan2( y3, x3 ) )
 
-    make_fig()
-    xPoints = [ 0, posArray[0], posArray[2], x3 ]
-    yPoints = [ 0, posArray[1], posArray[3], y3 ]
-    print(xPoints)
-    print(yPoints)
-    plt.scatter(xPoints, yPoints)
-    plt.show()
-
-
+    # make_fig()
+    # xPoints = [ 0, posArray[0], posArray[2], x3 ]
+    # yPoints = [ 0, posArray[1], posArray[3], y3 ]
+    # print(xPoints)
+    # print(yPoints)
+    # plt.scatter(xPoints, yPoints)
+    # plt.show()
 
     return np.abs(torque)
 
 
 x0 = [ -0.5, 0.5, 0.5 ]
 
-res = scipy.optimize.minimize(torque, x0, method='CG', jac='3-point')
+res = scipy.optimize.minimize(torque, x0, method='Nelder-Mead')
 print(res)
 
-fTorque = torque(x0)
-print(fTorque)
+# fTorque = torque(x0)
+# print(fTorque)
