@@ -62,9 +62,6 @@ def torque( positions ):
     posArray[2] = positions[2]
 
     posArray[3] = y3 - np.tan(-np.pi/3) * (positions[2]-positions[0])
-
-    # print(posArray)
-
     
     lengthArr = lengths(posArray, x3, y3)
 
@@ -103,6 +100,3 @@ x0 = [ -0.5, 0.5, 0.5 ]
 
 res = scipy.optimize.minimize(torque, x0, method='Nelder-Mead')
 print(res)
-
-# fTorque = torque(x0)
-# print(fTorque)
