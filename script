@@ -1,5 +1,4 @@
 import scipy.optimize._minimize
-import numpy as np
 import math
 import matplotlib.pyplot as plt 
 
@@ -24,9 +23,9 @@ def make_fig():
 
 def lengths( points, x3, y3):
     lengthArr = []
-    lengthArr.append( math.sqrt( (points[0]**2) + (points[1]**2) ) )
-    lengthArr.append( math.sqrt( ( points[2]- points[0] )**2 + ( points[3] - points[1] ) **2 ) )
-    lengthArr.append( math.sqrt( (x3 - points[ 2 ] )**2 + ( y3 - points[3] )**2 ) )
+    lengthArr.append( math.sqrt( ( points[0]**2 ) + (points[1]**2 ) ) )
+    lengthArr.append( math.sqrt( ( points[2]- points[0] ) **2 + ( points[3] - points[1] ) **2 ) )
+    lengthArr.append( math.sqrt( ( x3 - points[2] )**2 + ( y3 - points[3] )**2 ) )
     return lengthArr
 
 def mass( a, l ):
@@ -49,7 +48,22 @@ def midpoints( positions, x3, y3 ):
 
     return midpointArr
 
-def torque( positions ):
+def positionArr( positions, x3, y3 ):
+    array = []
+    array.append(0)
+    array.append(0)
+
+    for i in range( 0, len(positions) ):
+        array.append(positions[i])
+    
+    array.append( y3 - ( math.tan( -math.pi/3.0 ) * ( x3 - array[2] ) ) )
+
+    array.append(x3)
+    array.append(y3)
+
+    return array
+
+def torqueCalculator( positions ):
 
     posArray = [ 0, 0, 0 ]
 
@@ -60,7 +74,8 @@ def torque( positions ):
     posArray[1] = positions[1]
     posArray[2] = positions[2]
 
-    posArray.append( y3 - ( math.tan(-math.pi/3.0) * (x3 - positions[2]) ) )
+
+    posArray.append( y3 - ( math.tan( -math.pi/3.0 ) * ( x3 - positions[2] ) ) )
     
     lengthArr = lengths(posArray, x3, y3)
 
@@ -84,22 +99,28 @@ def torque( positions ):
 
     torque += forces[3] * x3 * math.sin( math.atan2( y3, x3 ) )
 
-    make_fig()
-    xPoints = [ 0, posArray[0], posArray[2], x3 ]
-    yPoints = [ 0, posArray[1], posArray[3], y3 ]
-    print(xPoints)
-    print(yPoints)
-    plt.scatter(xPoints, yPoints)
-    plt.show()
+    # make_fig()
+    # xPoints = [ 0, posArray[0], posArray[2], x3 ]
+    # yPoints = [ 0, posArray[1], posArray[3], y3 ]
+    # # print(xPoints)
+    # # print(yPoints)
+    # plt.scatter(xPoints, yPoints)
+    # plt.show()
 
+    print( torque )
+    print(posArray)
     return math.fabs(torque)
 
 
 x0 = [ -0.5, 0.5, 0.5 ]
 
 
-test = torque(x0)
-print(test)
-
-res = scipy.optimize.minimize(torque, x0, method='Nelder-Mead')
+res = scipy.optimize.minimize(torqueCalculator, x0, method="Nelder-Mead")
 print(res)
+
+xPoints = [ 0, -0.5478141373939869, 0.45005787240316486, 0.75]
+yPoints = [ 0, 0.5322259412463479, 0.6195150043280253, 0.1]
+
+plt.scatter(xPoints, yPoints)
+plt.plot(xPoints,yPoints)
+plt.show()
