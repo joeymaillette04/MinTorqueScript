@@ -21,20 +21,20 @@ def make_fig():
     return ax
 
 
-def lengths( points, x3, y3):
+def lengths( points, x3, y3): #calculates the lengths of each of the 3 arms 
     lengthArr = []
     lengthArr.append( math.sqrt( ( points[0]**2 ) + (points[1]**2 ) ) )
     lengthArr.append( math.sqrt( ( points[2]- points[0] ) **2 + ( points[3] - points[1] ) **2 ) )
     lengthArr.append( math.sqrt( ( x3 - points[2] )**2 + ( y3 - points[3] )**2 ) )
     return lengthArr
 
-def mass( a, l ):
-    return a * l
+def mass( p, l ): #calculates mass of each arm based on length and its density
+    return p * l
 
-def force( aMass ):
+def force( aMass ): #calculates force using mass and gravity constant (9.81N/kG)
     return aMass * 9.81
 
-def midpoints( positions, x3, y3 ):
+def midpoints( positions, x3, y3 ): #calculates the x-y coords of the midpoint of each arm because that's where the force is applied
     midpointArr = [ [], [], [] ]
 
     midpointArr[0].append( positions[0]/2 ) 
@@ -48,20 +48,6 @@ def midpoints( positions, x3, y3 ):
 
     return midpointArr
 
-def positionArr( positions, x3, y3 ):
-    array = []
-    array.append(0)
-    array.append(0)
-
-    for i in range( 0, len(positions) ):
-        array.append(positions[i])
-    
-    array.append( y3 - ( math.tan( -math.pi/3.0 ) * ( x3 - array[2] ) ) )
-
-    array.append(x3)
-    array.append(y3)
-
-    return array
 
 def torqueCalculator( positions ):
 
@@ -74,30 +60,29 @@ def torqueCalculator( positions ):
     posArray[1] = positions[1]
     posArray[2] = positions[2]
 
-
     posArray.append( y3 - ( math.tan( -math.pi/3.0 ) * ( x3 - positions[2] ) ) )
     
-    lengthArr = lengths(posArray, x3, y3)
+    lengthArr = lengths(posArray, x3, y3) #create new array and all lengths to it
 
-    masses = []
-    a = 8
+    masses = [] #add all masses to an array. density of the three arms are 4,2,1 hence the a /= 2
+    a = 4
     for i in range( 0, 3):
-        a /= 2
         masses.append( mass( a, lengthArr[i] ) )
+        a /= 2
     
-    forces=[]
+    forces=[] #using masses calculate the force applied at each of the midpoints
     for i in range( 0, 3 ):
         forces.append( force(masses[i]) )
     forces.append( force(5) )
 
-    midpointArr = midpoints( posArray, x3, y3 )
+    midpointArr = midpoints( posArray, x3, y3 ) #populate array with x and y coords of midpoints
 
     torque = 0
 
-    for i in range( 0, 3):
+    for i in range( 0, 3): #Add all the torque required for the three arms
         torque += ( forces[i] * midpointArr[i][0] * math.sin( math.atan2( midpointArr[i][1], midpointArr[i][0] ) ) )
 
-    torque += forces[3] * x3 * math.sin( math.atan2( y3, x3 ) )
+    torque += forces[3] * x3 * math.sin( math.atan2( y3, x3 ) ) #need to add the torque from the 5kg mass at the end of the arm
 
     # make_fig()
     # xPoints = [ 0, posArray[0], posArray[2], x3 ]
@@ -106,9 +91,11 @@ def torqueCalculator( positions ):
     # # print(yPoints)
     # plt.scatter(xPoints, yPoints)
     # plt.show()
-
+    totalLength = lengthArr[0] + lengthArr[1] + lengthArr[2]
+    print("Length below")
+    print( totalLength)
     print( torque )
-    print(posArray)
+    print( posArray )
     return math.fabs(torque)
 
 
