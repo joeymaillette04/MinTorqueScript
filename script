@@ -48,6 +48,13 @@ def midpoints( positions, x3, y3 ): #calculates the x-y coords of the midpoint o
 
     return midpointArr
 
+def calcMidPt( x1, y1, x2, y2 ):
+    
+    midX = ( x2-x1 )/2 + x1
+    midY = ( y2-y1 )/2 + y1
+
+    return x1, y1
+
 
 def torqueCalculator( positions ):
 
@@ -162,9 +169,29 @@ def get_intersections(x0, y0, r0, x1, y1, r1):
 def calculateTorque2( armLengths ):
     gripperPts= [ [ 0.75, 0.1 ], [ 0.5, 0.5 ], [ 0.2, 0.6 ] ]
     gripperAngles = [ -math.pi/3.0, 0, math.pi/4 ]
+    torques = [ 0, 0, 0 ]
+
 
     #do this in a for loop to calculate the torques at 3 positions then return the root of the 3 torques squared
+    midPts = [ [ ], [ ], [ ] ]
     x1, y1, x2, y2 = get_intersections(0, 0, armLengths[0], gripperPts[0][0], gripperPts[0][1], armLengths[1])
+    armMasses = [ 0, 0 , 0]
+    a = 4
+    for i in range( 3 ):
+        armMasses[i] = mass(a, armLengths[i] )
+        a /= 4
+
+    gravForces = [ 0, 0, 0 ]
+    for i in range( 3 ):
+        gravForces[i] = force(armMasses[i])
+    
+    midPts[ 0 ] = calcMidPt( 0, 0, x1, y1 )
+    midPts[ 1 ] = calcMidPt( x1, y1, x2, y2 )
+    midPts[ 2 ] = calcMidPt( x2, y2, gripperPts[0][0], gripperPts[0][1] )
+
+
+
+    
 
 
 
