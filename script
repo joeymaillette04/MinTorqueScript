@@ -73,7 +73,7 @@ def torqueCalculator( positions ):
     forces=[] #using masses calculate the force applied at each of the midpoints
     for i in range( 0, 3 ):
         forces.append( force(masses[i]) )
-    forces.append( force(5) )
+    forces.append( force( 5 ) )
 
     midpointArr = midpoints( posArray, x3, y3 ) #populate array with x and y coords of midpoints
 
@@ -84,13 +84,6 @@ def torqueCalculator( positions ):
 
     torque += forces[3] * x3 * math.sin( math.atan2( y3, x3 ) ) #need to add the torque from the 5kg mass at the end of the arm
 
-    # make_fig()
-    # xPoints = [ 0, posArray[0], posArray[2], x3 ]
-    # yPoints = [ 0, posArray[1], posArray[3], y3 ]
-    # # print(xPoints)
-    # # print(yPoints)
-    # plt.scatter(xPoints, yPoints)
-    # plt.show()
     totalLength = lengthArr[0] + lengthArr[1] + lengthArr[2]
     print("Length below")
     print( totalLength)
@@ -111,3 +104,26 @@ yPoints = [ 0, 0.5322259412463479, 0.6195150043280253, 0.1]
 plt.scatter(xPoints, yPoints)
 plt.plot(xPoints,yPoints)
 plt.show()
+
+#moved the data plots outside the function so it does not plot after every iteration of optimixzation
+
+
+# make_fig()
+# xPoints = [ 0, posArray[0], posArray[2], x3 ]
+# yPoints = [ 0, posArray[1], posArray[3], y3 ]
+# # print(xPoints)
+# # print(yPoints)
+# plt.scatter(xPoints, yPoints)
+# plt.show()
+
+#function to calculate torques at different positions
+gripperPts= [ [ 0.75, 0.1 ], [ 0.5, 0.5 ], [ 0.2, 0.6 ] ]
+armAPts = [ [ ], [ ], [ ] ] #given once angles are known
+atmBEPts = [ [ ], [ ], [ ] ] #given once angles are known
+armAAngles = [ 0, 0, 0 ] #must solve for these values
+armBAngles = [ 0, 0, 0 ] #must solve for these values
+armLengths = [ 0, 0, 0 ] #given from the output of function above
+gripperAngles = [ -math.pi/3.0, 0, math.pi/4 ]
+torques = [ 0, 0, 0]
+
+finalTorque = math.sqrt( torques[0]**2 + torques[1]**2 + torques[2]**2 )
