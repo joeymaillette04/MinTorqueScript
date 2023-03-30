@@ -85,7 +85,7 @@ def torqueCalculator( positions ):
 
     midpointArr = midpoints( posArray, x3, y3 ) #populate array with x and y coords of midpoints
 
-    torque = 0
+    
 
     for i in range( 0, 3): #Add all the torque required for the three arms
         torque += ( forces[i] * midpointArr[i][0] * math.sin( math.atan2( midpointArr[i][1], midpointArr[i][0] ) ) )
@@ -124,16 +124,16 @@ x0 = [ -0.5, 0.5, 0.5 ]
 # plt.show()
 
 #function to calculate torques at different positions
-gripperPts= [ [ 0.75, 0.1 ], [ 0.5, 0.5 ], [ 0.2, 0.6 ] ]
-armAPts = [ [ ], [ ], [ ] ] #given once angles are known
-atmBEPts = [ [ ], [ ], [ ] ] #given once angles are known
-armAAngles = [ 0, 0, 0 ] #must solve for these values
-armBAngles = [ 0, 0, 0 ] #must solve for these values
-armLengths = [ 0, 0, 0 ] #given from the output of function above
-gripperAngles = [ -math.pi/3.0, 0, math.pi/4 ]
-torques = [ 0, 0, 0]
+# gripperPts= [ [ 0.75, 0.1 ], [ 0.5, 0.5 ], [ 0.2, 0.6 ] ]
+# armAPts = [ [ ], [ ], [ ] ] #given once angles are known
+# atmBEPts = [ [ ], [ ], [ ] ] #given once angles are known
+# armAAngles = [ 0, 0, 0 ] #must solve for these values
+# armBAngles = [ 0, 0, 0 ] #must solve for these values
+# armLengths = [ 0, 0, 0 ] #given from the output of function above
+# gripperAngles = [ -math.pi/3.0, 0, math.pi/4 ]
+# torques = [ 0, 0, 0]
 
-finalTorque = math.sqrt( torques[0]**2 + torques[1]**2 + torques[2]**2 )
+# finalTorque = math.sqrt( torques[0]**2 + torques[1]**2 + torques[2]**2 )
 
 #new function below.
 #this function will take in an array of 3 lengths then calculate the points and torques
@@ -181,9 +181,9 @@ def calculateTorque2( armLengths ):
 
         midPts = [ [ ], [ ], [ ] ]
         x1, y1, x2, y2 = get_intersections(0, 0, armLengths[ 0 ], bx, by, armLengths[ 1 ])
-        armMasses = [ 0, 0 , 0]
+        armMasses = [ 0, 0, 0]
         a = 4
-        for i in range( 3 ):
+        for l in range( 3 ):
             armMasses[i] = mass(a, armLengths[ i ] )
             a /= 2
 
@@ -194,14 +194,29 @@ def calculateTorque2( armLengths ):
 
         #calculate the midpoints of each member, this is where the gravity force acts.
         midPts[ 0 ] = calcMidPt( 0, 0, x1, y1 )
-        midPts[ 1 ] = calcMidPt( x1, y1, x2, y2 )
-        midPts[ 2 ] = calcMidPt( x2, y2, gripperPts[ i ][0], gripperPts[ i ][1] )
+        midPts[ 1 ] = calcMidPt( x1, y1, bx, by )
+        midPts[ 2 ] = calcMidPt( bx, by, gripperPts[ i ][0], gripperPts[ i ][1] )
+
+        
+        tempMidPtA1 = calcMidPt( 0, 0, x1, y1 )
+        torqueA = gravForces[ 1 ] * tempMidPtA1[0] * math.sin( math.atan2( tempMidPtA1[1], tempMidPtA1[0]))
+        tempMidPtA2 = calcMidPt( x1, y1, bx, by )
+        torqueA += gravForces[ 1 ] * tempMidPtA2[ 0 ] * math.sin( math.atan2( tempMidPtA2[1], tempMidPtA2[0]))
+        tempMidPtB1 = calcMidPt( 0, 0, x2, y2 )
+        torqueB = gravForces[ 1 ] * tempMidPtB1[ 0 ] * math.sin( math.atan2( tempMidPtB1[1], tempMidPtB1[0] ))
+        tempMidPtB2 = calcMidPt( x2, y2, bx, by)
+        torqueB += gravForces[ 1 ] * tempMidPtB2[ 0 ] * math.sin( math.atan2( tempMidPtB2[1], tempMidPtB2[0] ))
+        
+
+        if (torqueB < torqueA):
+            midPts[0] = tempMidPtB1
+            midPts[1] = tempMidPtB2
+
 
         for j in range( 0, 3): #Add all the torque required for the three arms
             torques[ i ] += ( gravForces[ j ] * midPts[ j ][ 0 ] * math.sin( math.atan2( midPts[ j ][ 1 ], midPts[ j ][ 0 ] ) ) )
 
         torques[ i ] += ( gripperForce * gripperPts[ i ][0] * math.sin( math.atan2( gripperPts[ i ][1], gripperPts[ i ][0] ) ) )
-
 
 
     finalTorque = math.sqrt( torques[ 0 ]**2 + torques[ 1 ]**2 + torques[ 2 ]**2 )
@@ -214,5 +229,3 @@ testLengths = [ 0.5, 0.6, 0.3 ]
 test = calculateTorque2(testLengths)
 
 print(test)
-
-
