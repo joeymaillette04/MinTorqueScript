@@ -1,6 +1,7 @@
 import scipy.optimize._minimize
 import math
 import matplotlib.pyplot as plt 
+import numpy as np
 
 
 def make_fig():
@@ -102,15 +103,14 @@ def torqueCalculator( positions ):
 x0 = [ -0.5, 0.5, 0.5 ]
 
 
-res = scipy.optimize.minimize(torqueCalculator, x0, method="Nelder-Mead")
-print(res)
+# print(res)
 
-xPoints = [ 0, -0.5478141373939869, 0.45005787240316486, 0.75]
-yPoints = [ 0, 0.5322259412463479, 0.6195150043280253, 0.1]
+# xPoints = [ 0, -0.5478141373939869, 0.45005787240316486, 0.75]
+# yPoints = [ 0, 0.5322259412463479, 0.6195150043280253, 0.1]
 
-plt.scatter(xPoints, yPoints)
-plt.plot(xPoints,yPoints)
-plt.show()
+# plt.scatter(xPoints, yPoints)
+# plt.plot(xPoints,yPoints)
+# plt.show()
 
 #moved the data plots outside the function so it does not plot after every iteration of optimixzation
 
@@ -166,34 +166,53 @@ def get_intersections(x0, y0, r0, x1, y1, r1):
 
         return (x3, y3, x4, y4)
 
+
+
 def calculateTorque2( armLengths ):
     gripperPts= [ [ 0.75, 0.1 ], [ 0.5, 0.5 ], [ 0.2, 0.6 ] ]
+    gripperForce = 5 * 9.81
     gripperAngles = [ -math.pi/3.0, 0, math.pi/4 ]
     torques = [ 0, 0, 0 ]
 
-
-    #do this in a for loop to calculate the torques at 3 positions then return the root of the 3 torques squared
-    midPts = [ [ ], [ ], [ ] ]
-    x1, y1, x2, y2 = get_intersections(0, 0, armLengths[0], gripperPts[0][0], gripperPts[0][1], armLengths[1])
-    armMasses = [ 0, 0 , 0]
-    a = 4
+    #everything below this should be in a for loop to calculate the torques at 3 positions then return the root of the 3 torques squared
     for i in range( 3 ):
-        armMasses[i] = mass(a, armLengths[i] )
-        a /= 4
+        bx = gripperPts[ i ][ 0 ] - ( armLengths[ 2 ] * math.cos(gripperAngles[ i ] ) )
+        by = gripperPts[ i ][ 1 ] - ( armLengths[ 2 ] * math.sin(gripperAngles[ i ] ) )
 
-    gravForces = [ 0, 0, 0 ]
-    for i in range( 3 ):
-        gravForces[i] = force(armMasses[i])
+        midPts = [ [ ], [ ], [ ] ]
+        x1, y1, x2, y2 = get_intersections(0, 0, armLengths[ 0 ], bx, by, armLengths[ 1 ])
+        armMasses = [ 0, 0 , 0]
+        a = 4
+        for i in range( 3 ):
+            armMasses[i] = mass(a, armLengths[ i ] )
+            a /= 2
+
+        #calculate the gravity forces of each member
+        gravForces = [ 0, 0, 0 ]
+        for k in range( 3 ):
+            gravForces[ k ] = force( armMasses[ k ])
+
+        #calculate the midpoints of each member, this is where the gravity force acts.
+        midPts[ 0 ] = calcMidPt( 0, 0, x1, y1 )
+        midPts[ 1 ] = calcMidPt( x1, y1, x2, y2 )
+        midPts[ 2 ] = calcMidPt( x2, y2, gripperPts[ i ][0], gripperPts[ i ][1] )
+
+        for j in range( 0, 3): #Add all the torque required for the three arms
+            torques[ i ] += ( gravForces[ j ] * midPts[ j ][ 0 ] * math.sin( math.atan2( midPts[ j ][ 1 ], midPts[ j ][ 0 ] ) ) )
+
+        torques[ i ] += ( gripperForce * gripperPts[ i ][0] * math.sin( math.atan2( gripperPts[ i ][1], gripperPts[ i ][0] ) ) )
+
+
+
+    finalTorque = math.sqrt( torques[ 0 ]**2 + torques[ 1 ]**2 + torques[ 2 ]**2 )
+
+    return finalTorque
     
-    midPts[ 0 ] = calcMidPt( 0, 0, x1, y1 )
-    midPts[ 1 ] = calcMidPt( x1, y1, x2, y2 )
-    midPts[ 2 ] = calcMidPt( x2, y2, gripperPts[0][0], gripperPts[0][1] )
 
 
+testLengths = [ 0.5, 0.6, 0.3 ]
+test = calculateTorque2(testLengths)
 
-    
-
-
-
+print(test)
 
 
