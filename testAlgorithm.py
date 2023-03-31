@@ -14,7 +14,7 @@ def runTests(approxHours):
         l2 = np.random.uniform(low=1.0, high=10.0, size=None)
         l3 = np.random.uniform(low=1.0, high=10.0, size=None)
         testLengths = [l1, l2, l3]
-        results = scipy.optimize.minimize(torqueCalculator2, testLengths, method="Nelder-Mead")
+        results = scipy.optimize.minimize(calculateTorque2, testLengths, method="Nelder-Mead")
         resultsLen.append(results.x)
         resultsTorque.append(results.fun)
 
