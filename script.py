@@ -99,6 +99,5 @@ print(test)
 def lengthConstr( inputLens ):
     return inputLens[0] + inputLens[1] + inputLens[2]
 
-
 # constrMax = NonlinearConstraint(lengthConstr, 1, np.Inf, keep_feasible=True)
 # results = scipy.optimize.minimize( calculateTorque2, testLengths, method="Nelder-Mead" ) #, constraints=( constrMax ) )
