@@ -5,6 +5,7 @@ import scipy.optimize._minimize
 
 from scipy.optimize import NonlinearConstraint
 
+
 def get_intersections(x0, y0, r0, x1, y1, r1):
     # circle 1: (x0, y0), radius r0
     # circle 2: (x1, y1), radius r1
@@ -87,17 +88,19 @@ def calculateTorque2( armLengths ):
 
         torques[ i ] += ( gripperForce * gripperPts[ i ][0] ) 
 
-    finalTorque = math.sqrt( torques[ 0 ]**2 + torques[ 1 ]**2 + torques[ 2 ]**2 )  
+    finalTorque = math.sqrt( torques[ 0 ]**2 + torques[ 1 ]**2 + torques[ 2 ]**2 )
+    print( "Position 1 torque", torques[0] )    
     return finalTorque
-
 
 testLengths = [ 0.5, 0.6, 0.3 ]
 test = calculateTorque2(testLengths)
 
-print(test)
+print("Torque of all positions combined", test)
 
 def lengthConstr( inputLens ):
     return inputLens[0] + inputLens[1] + inputLens[2]
+
+
 
 # constrMax = NonlinearConstraint(lengthConstr, 1, np.Inf, keep_feasible=True)
 # results = scipy.optimize.minimize( calculateTorque2, testLengths, method="Nelder-Mead" ) #, constraints=( constrMax ) )
