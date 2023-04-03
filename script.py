@@ -2,8 +2,12 @@ import math
 import matplotlib.pyplot as plt 
 import numpy as np
 import scipy.optimize._minimize
+from scipy.optimize import _minimize as minimize
+from scipy.optimize import Bounds
 
 from scipy.optimize import NonlinearConstraint
+from scipy.optimize import LinearConstraint
+
 
 
 def get_intersections(x0, y0, r0, x1, y1, r1):
@@ -44,7 +48,6 @@ def mass( p, l ): #calculates mass of each arm based on length and its density
 
 def force( aMass ): #calculates force using mass and gravity constant (9.81N/kG)
     return aMass * 9.81
-
 
 def calculateTorque2( armLengths ):
     gripperPts= [ [ 0.75, 0.1 ], [ 0.5, 0.5 ], [ 0.2, 0.6 ] ]
@@ -93,14 +96,83 @@ def calculateTorque2( armLengths ):
     return finalTorque
 
 testLengths = [ 0.5, 0.6, 0.3 ]
-test = calculateTorque2(testLengths)
 
-print("Torque of all positions combined", test)
+# test = calculateTorque2(testLengths)
+# print("Torque of all positions combined", test)
+
 
 def lengthConstr( inputLens ):
     return inputLens[0] + inputLens[1] + inputLens[2]
 
+constrMax = NonlinearConstraint(lengthConstr, 1, np.Inf, keep_feasible=True)
 
 
-# constrMax = NonlinearConstraint(lengthConstr, 1, np.Inf, keep_feasible=True)
-# results = scipy.optimize.minimize( calculateTorque2, testLengths, method="Nelder-Mead" ) #, constraints=( constrMax ) )
+def checkInter( inputLengths ):
+    return inputLengths[0] - inputLengths[1]
+
+cnstrnts = LinearConstraint( [ [1, 1, 1 ], [ -1, 1, 0] ], [1, 0 ], [ np.Inf, 0.2], keep_feasible=True )
+
+
+bnds = Bounds( [ 0, 0, 0 ], [ np.Inf, np.Inf, 0.5 ], keep_feasible=True)
+
+
+results = scipy.optimize.minimize( calculateTorque2, testLengths, method="trust-constr", bounds=bnds, constraints=cnstrnts )
+
+print(results)
+
+finalLens = results.x
+
+
+
+def calculate_point(x1, y1, d1, x2, y2, d2):
+    """
+    Given two reference points (x1, y1) and (x2, y2) and distances d1 and d2,
+    returns the coordinates of a point (x, y) that is at a distance of d2 from (x2, y2)
+    and a distance of d1 from (x1, y1).
+    """
+    # Calculate the distance between the two reference points
+    dist_between_points = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
+
+    # Calculate the angle between the two reference points
+    angle = math.atan2(y2 - y1, x2 - x1)
+
+    # Calculate the coordinates of the point we want to find
+    x = x2 + d2 * math.cos(angle)
+    y = y2 + d2 * math.sin(angle)
+
+    # Check if the point is within the range of the first reference point
+    if math.sqrt((x - x1)**2 + (y - y1)**2) != d1:
+        print("Error: Point is not at the correct distance from the first reference point.")
+        return None
+
+    return (x, y)
+
+
+
+pos1Points =  [ [ 0, calculate_point( 0, 0, finalLens[0], ), 0.75 - finalLens[2] * abs(math.cos(-math.pi/3)), 0.75 ], 
+              [ 0, 0, 0.10 - finalLens[2] * abs(math.cos(-math.pi/3)), 0.10 ] ]
+pos2Points =  [ [ 0, 0, 0.50 - finalLens[2] * abs(math.cos(0)), 0.50 ], 
+              [ 0, 0, 0.50 - finalLens[2] * abs(math.cos(0)), 0.5 ] ] 
+pos3Points =  [ [ 0, 0, 0, 0.60 ], 
+              [ 0, 0, 0.20 - finalLens[2] * abs(math.cos(-math.pi/4)), 0.20 ] ]
+
+plt.xlim = 0.5
+plt.ylim = 0.5
+# plt.grid()
+
+plt.plot( pos1Points[0], pos1Points[1], label = "Pos 1")
+plt.plot( pos2Points[0], pos2Points[1], label = "Pos 2")
+plt.plot( pos3Points[0], pos3Points[1], label = "Pos 3")
+plt.show()
+
+# 0.75 - finalLens[2] * abs(math.cos(-math.pi/3))
+# 0.10 - finalLens[2] * abs(math.cos(-math.pi/3))
+# bx = gripperPts[ i ][ 0 ] - (armLengths[ 2 ] * abs(math.cos(gripperAngles[ i ])))
+# by = gripperPts[ i ][ 1 ] - (armLengths[ 2 ] * math.sin(gripperAngles[ i ]))
+
+
+
+# def checkY( inputLengths ):
+#     return inputLengths[2]
+# constrY = NonlinearConstraint(checkY, [ 0, 0, 0 ], [ np.Inf, np.Inf, 0.6 ], keep_feasible=True)
+#NonlinearConstraint( checkInter, -3, 3, keep_feasible=True )
