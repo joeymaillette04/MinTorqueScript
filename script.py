@@ -9,6 +9,10 @@ from scipy.optimize import NonlinearConstraint
 from scipy.optimize import LinearConstraint
 
 
+global positionPoints
+
+positionPoints = [ [ [0, 0, 0, 0.75], [0, 0, 0, 0.1] ], [ [0, 0, 0, 0.5], [0, 0, 0, 0.5] ], [ [0, 0, 0, 0.2], [0, 0, 0, 0.6] ] ]
+
 
 def get_intersections(x0, y0, r0, x1, y1, r1):
     # circle 1: (x0, y0), radius r0
@@ -56,11 +60,11 @@ def calculateTorque2( armLengths ):
     torques = [ 0, 0, 0 ]
 
     for i in range( 3 ):
-        bx = gripperPts[ i ][ 0 ] - (armLengths[ 2 ] * abs(math.cos(gripperAngles[ i ])))
-        by = gripperPts[ i ][ 1 ] - (armLengths[ 2 ] * math.sin(gripperAngles[ i ]))
+        positionPoints[ i ][ 0 ][ 2 ] = gripperPts[ i ][ 0 ] - (armLengths[ 2 ] * abs(math.cos(gripperAngles[ i ])))
+        positionPoints[ i ][ 1 ][ 2 ] = gripperPts[ i ][ 1 ] - (armLengths[ 2 ] * math.sin(gripperAngles[ i ]))
 
         midPts = [ [ ], [ ], [ ] ]
-        x1, y1, x2, y2 = get_intersections(0, 0, armLengths[ 0 ], bx, by, armLengths[ 1 ])
+        positionPoints[i][0][1], positionPoints[i][1][1], x2, y2 = get_intersections(0, 0, armLengths[ 0 ], positionPoints[ i ][ 0 ][ 2 ], positionPoints[ i ][ 1 ][ 2 ], armLengths[ 1 ])
         armMasses = [ 0, 0, 0]
 
         a = 4
@@ -74,16 +78,18 @@ def calculateTorque2( armLengths ):
             gravForces[ k ] = force( armMasses[ k ])
 
         #calculate the midpoints of each member, this is where the gravity force acts.
-        midPts[ 0 ] = calcMidPt( 0, x1 )
-        midPts[ 1 ] = calcMidPt( x1, bx )
-        midPts[ 2 ] = calcMidPt( bx, gripperPts[ i ][0] )
+        midPts[ 0 ] = calcMidPt( 0, positionPoints[i][0][1] )
+        midPts[ 1 ] = calcMidPt( positionPoints[i][0][1], positionPoints[i][0][2] )
+        midPts[ 2 ] = calcMidPt( positionPoints[i][0][2], gripperPts[ i ][0] )
 
-        torque1 = gravForces[ 0 ] * calcMidPt( 0, x1 ) + gravForces[ 1 ] * calcMidPt( x1, bx )
-        torque2 = gravForces[ 0 ] * calcMidPt( 0, x2 ) + gravForces[ 1 ] * calcMidPt( x2, bx )
+        torque1 = gravForces[ 0 ] * calcMidPt( 0, positionPoints[i][0][1] ) + gravForces[ 1 ] * calcMidPt( positionPoints[i][0][1], positionPoints[i][0][2] )
+        torque2 = gravForces[ 0 ] * calcMidPt( 0, x2 ) + gravForces[ 1 ] * calcMidPt( x2, positionPoints[i][0][2] )
 
         if (torque2 < torque1):
+            positionPoints[i][0][1] = x2
+            positionPoints[i][1][1]
             midPts[0] = calcMidPt( 0, x2 )
-            midPts[1] = calcMidPt( x2, bx )
+            midPts[1] = calcMidPt( x2, positionPoints[i][0][2] )
 
 
         for j in range( 0, 3): #Add all the torque required for the three arms
@@ -123,53 +129,15 @@ print(results)
 finalLens = results.x
 
 
+plt.xlim = 1
+plt.ylim = 1
+plt.grid()
 
-def calculate_point(x1, y1, d1, x2, y2, d2):
-    """
-    Given two reference points (x1, y1) and (x2, y2) and distances d1 and d2,
-    returns the coordinates of a point (x, y) that is at a distance of d2 from (x2, y2)
-    and a distance of d1 from (x1, y1).
-    """
-    # Calculate the distance between the two reference points
-    dist_between_points = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
-
-    # Calculate the angle between the two reference points
-    angle = math.atan2(y2 - y1, x2 - x1)
-
-    # Calculate the coordinates of the point we want to find
-    x = x2 + d2 * math.cos(angle)
-    y = y2 + d2 * math.sin(angle)
-
-    # Check if the point is within the range of the first reference point
-    if math.sqrt((x - x1)**2 + (y - y1)**2) != d1:
-        print("Error: Point is not at the correct distance from the first reference point.")
-        return None
-
-    return (x, y)
-
-
-
-pos1Points =  [ [ 0, calculate_point( 0, 0, finalLens[0], ), 0.75 - finalLens[2] * abs(math.cos(-math.pi/3)), 0.75 ], 
-              [ 0, 0, 0.10 - finalLens[2] * abs(math.cos(-math.pi/3)), 0.10 ] ]
-pos2Points =  [ [ 0, 0, 0.50 - finalLens[2] * abs(math.cos(0)), 0.50 ], 
-              [ 0, 0, 0.50 - finalLens[2] * abs(math.cos(0)), 0.5 ] ] 
-pos3Points =  [ [ 0, 0, 0, 0.60 ], 
-              [ 0, 0, 0.20 - finalLens[2] * abs(math.cos(-math.pi/4)), 0.20 ] ]
-
-plt.xlim = 0.5
-plt.ylim = 0.5
-# plt.grid()
-
-plt.plot( pos1Points[0], pos1Points[1], label = "Pos 1")
-plt.plot( pos2Points[0], pos2Points[1], label = "Pos 2")
-plt.plot( pos3Points[0], pos3Points[1], label = "Pos 3")
-plt.show()
-
-# 0.75 - finalLens[2] * abs(math.cos(-math.pi/3))
-# 0.10 - finalLens[2] * abs(math.cos(-math.pi/3))
-# bx = gripperPts[ i ][ 0 ] - (armLengths[ 2 ] * abs(math.cos(gripperAngles[ i ])))
-# by = gripperPts[ i ][ 1 ] - (armLengths[ 2 ] * math.sin(gripperAngles[ i ]))
-
+plt.plot( positionPoints[0][0], positionPoints[0][1], label = "Pos 1")
+plt.plot( positionPoints[1][0], positionPoints[1][1], label = "Pos 2")
+plt.plot( positionPoints[2][0], positionPoints[2][1], label = "Pos 3")
+plt.legend()
+plt.show() 
 
 
 # def checkY( inputLengths ):
