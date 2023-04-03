@@ -2,9 +2,7 @@ import math
 import matplotlib.pyplot as plt 
 import numpy as np
 import scipy.optimize._minimize
-from scipy.optimize import _minimize as minimize
 from scipy.optimize import Bounds
-
 from scipy.optimize import NonlinearConstraint
 from scipy.optimize import LinearConstraint
 
@@ -101,7 +99,8 @@ def calculateTorque2( armLengths ):
     print( "Position 1 torque", torques[0] )    
     return finalTorque
 
-testLengths = [ 0.5, 0.6, 0.3 ]
+testLengths = [ 0.5, 0.5, 0.02 ]
+# calculateTorque2(testLengths)
 
 # test = calculateTorque2(testLengths)
 # print("Torque of all positions combined", test)
@@ -116,10 +115,10 @@ constrMax = NonlinearConstraint(lengthConstr, 1, np.Inf, keep_feasible=True)
 def checkInter( inputLengths ):
     return inputLengths[0] - inputLengths[1]
 
-cnstrnts = LinearConstraint( [ [1, 1, 1 ], [ -1, 1, 0] ], [1, 0 ], [ np.Inf, 0.2], keep_feasible=True )
+cnstrnts = LinearConstraint( [ [ 1, 1, 1 ], [ -1, 1, 0 ] ], [ 1, 0 ], [ np.Inf, 0.1 ], keep_feasible=True )
 
 
-bnds = Bounds( [ 0, 0, 0 ], [ np.Inf, np.Inf, 0.5 ], keep_feasible=True)
+bnds = Bounds( [ 0, 0, 0 ], [ np.Inf, np.Inf, 0.15 ], keep_feasible=True)
 
 
 results = scipy.optimize.minimize( calculateTorque2, testLengths, method="trust-constr", bounds=bnds, constraints=cnstrnts )
@@ -128,6 +127,7 @@ print(results)
 
 finalLens = results.x
 
+print(finalLens[2])
 
 plt.xlim = 1
 plt.ylim = 1
