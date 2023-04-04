@@ -30,11 +30,10 @@ In order to develop this optimization script, we have utilized various python fr
 * ![SciPy](https://img.shields.io/badge/SciPy-%230C55A5.svg?style=for-the-badge&logo=scipy&logoColor=%white)
 * ![Matplotlib](https://img.shields.io/badge/Matplotlib-%23ffffff.svg?style=for-the-badge&logo=Matplotlib&logoColor=black)
 
-### Contributions
-
 Additional information about the project can be found in the [Report](do later).
 
-Team Links (Linkedin):
+### Contributions
+
 * [Joey Maillette](https://www.linkedin.com/in/joeymaillette/)
 * [Camron Sabahi-Pourkashani](https://www.linkedin.com/in/camron-sabahi/)
 * [Karthigan Uthayan](https://www.linkedin.com/in/karthiganu2004/)
