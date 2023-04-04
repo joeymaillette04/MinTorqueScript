@@ -54,7 +54,7 @@ def force( aMass ): #calculates force using mass and gravity constant (9.81N/kG)
 def calculateTorque2( armLengths ):
     gripperPts= [ [ 0.75, 0.1 ], [ 0.5, 0.5 ], [ 0.2, 0.6 ] ]
     gripperForce = 5 * 9.81
-    gripperAngles = [ -math.pi/3.0 , 0, math.pi/4 ]
+    gripperAngles = [ -math.pi/3.0 , 0, math.pi/4.0 ]
     torques = [ 0, 0, 0 ]
 
     for i in range( 3 ):
@@ -78,7 +78,7 @@ def calculateTorque2( armLengths ):
         #calculate the midpoints of each member, this is where the gravity force acts.
         midPts[ 0 ] = calcMidPt( 0, positionPoints[i][0][1] )
         midPts[ 1 ] = calcMidPt( positionPoints[i][0][1], positionPoints[i][0][2] )
-        midPts[ 2 ] = calcMidPt( positionPoints[i][0][2], gripperPts[ i ][0] )
+        midPts[ 2 ] = calcMidPt( positionPoints[i][0][2], gripperPts[i][0] )
 
         torque1 = gravForces[ 0 ] * calcMidPt( 0, positionPoints[i][0][1] ) + gravForces[ 1 ] * calcMidPt( positionPoints[i][0][1], positionPoints[i][0][2] )
         torque2 = gravForces[ 0 ] * calcMidPt( 0, x2 ) + gravForces[ 1 ] * calcMidPt( x2, positionPoints[i][0][2] )
@@ -99,8 +99,9 @@ def calculateTorque2( armLengths ):
     print( "Position 1 torque", torques[0] )    
     return finalTorque
 
-testLengths = [ 0.5, 0.5, 0.02 ]
+testLengths = [ 0.4, 0.4, 0.3 ]
 # calculateTorque2(testLengths)
+
 
 # test = calculateTorque2(testLengths)
 # print("Torque of all positions combined", test)
@@ -118,16 +119,16 @@ def checkInter( inputLengths ):
 cnstrnts = LinearConstraint( [ [ 1, 1, 1 ], [ -1, 1, 0 ] ], [ 1, 0 ], [ np.Inf, 0.1 ], keep_feasible=True )
 
 
-bnds = Bounds( [ 0, 0, 0 ], [ np.Inf, np.Inf, 0.15 ], keep_feasible=True)
+bnds = Bounds( [ 0, 0, 0 ], [ 0.6, 0.5, 0.4 ], keep_feasible=True)
 
 
-results = scipy.optimize.minimize( calculateTorque2, testLengths, method="trust-constr", bounds=bnds, constraints=cnstrnts )
+results = scipy.optimize.minimize( calculateTorque2, testLengths, method="trust-constr", bounds=bnds, constraints=cnstrnts ) # options={'maxiter':1000})
 
 print(results)
 
 finalLens = results.x
 
-print(finalLens[2])
+# print(finalLens[2])
 
 plt.xlim = 1
 plt.ylim = 1
