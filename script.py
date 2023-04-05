@@ -87,9 +87,9 @@ def calculateTorque2( armLengths ):
         torque2 = gravForces[ 0 ] * calcMidPt( 0, x2 ) + gravForces[ 1 ] * calcMidPt( x2, positionPoints[i][0][2] )
 
         #use the position which required the least torque for equilibirum
-        if (torque2 < torque1):
+        if ( ( ( torque2 < torque1) and ( y2 > 0)) or ( positionPoints[i][1][1] < 0 ) ):            
             positionPoints[i][0][1] = x2
-            positionPoints[i][1][1] =y2
+            positionPoints[i][1][1] = y2
             midPts[0] = calcMidPt( 0, x2 )
             midPts[1] = calcMidPt( x2, positionPoints[i][0][2] )
 
@@ -121,7 +121,8 @@ def calculateTorque2( armLengths ):
     return finalTorque
 
 # best lengths tested (to plot) 
-testLengths = [0.9672434657367032, 0.6012485386425627, 0.8017252288850533]
+testLengths = [ 0.5, 0.5, 0.5 ]
+# testLengths = [0.9672434657367032, 0.6012485386425627, 0.8017252288850533]
 fTorque = calculateTorque2(testLengths)
 print("Final combined torque", fTorque)
 
