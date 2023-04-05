@@ -8,7 +8,6 @@ from scipy.optimize import Bounds
 from scipy.optimize import NonlinearConstraint
 from scipy.optimize import LinearConstraint
 
-
 global positionPoints
 
 positionPoints = [ [ [0, 0, 0, 0.75], [0, 0, 0, 0.1] ], [ [0, 0, 0, 0.5], [0, 0, 0, 0.5] ], [ [0, 0, 0, 0.2], [0, 0, 0, 0.6] ] ]
@@ -43,7 +42,7 @@ def get_intersections(x0, y0, r0, x1, y1, r1):
         return (x3, y3, x4, y4)
 
 
-def calcMidPt( x1, x2 ):
+def calcMidPt( x1, x2 ): #calculates the midpoint of an arm given the x positions at both ends
     midX = ( x2 + x1 )/2
     return midX
 
@@ -60,7 +59,7 @@ def calculateTorque2( armLengths ):
     gripperAngles = [ -math.pi/3.0 , 0, math.pi/4.0 ]
     torques = [ 0, 0, 0 ]
 
-    for i in range( 3 ):
+    for i in range( 3 ): #iterates once for each position the arm must reach
         positionPoints[ i ][ 0 ][ 2 ] = positionPoints[ i ][ 0 ][3] - (armLengths[ 2 ] * abs(math.cos(gripperAngles[ i ])))
         positionPoints[ i ][ 1 ][ 2 ] = positionPoints[ i ][ 1 ][3] - (armLengths[ 2 ] * math.sin(gripperAngles[ i ]))
 
@@ -83,9 +82,11 @@ def calculateTorque2( armLengths ):
         midPts[ 1 ] = calcMidPt( positionPoints[i][0][1], positionPoints[i][0][2] )
         midPts[ 2 ] = calcMidPt( positionPoints[i][0][2], positionPoints[i][0][3] )
 
+        #compare the torque of the 2 possible points the circles intersect. 2 possible positions for point A.
         torque1 = gravForces[ 0 ] * calcMidPt( 0, positionPoints[i][0][1] ) + gravForces[ 1 ] * calcMidPt( positionPoints[i][0][1], positionPoints[i][0][2] )
         torque2 = gravForces[ 0 ] * calcMidPt( 0, x2 ) + gravForces[ 1 ] * calcMidPt( x2, positionPoints[i][0][2] )
 
+        #use the position which required the least torque for equilibirum
         if (torque2 < torque1):
             positionPoints[i][0][1] = x2
             positionPoints[i][1][1] =y2
@@ -96,13 +97,18 @@ def calculateTorque2( armLengths ):
         for j in range( 0, 3): #Add all the torque required for the three arms
             torques[ i ] += ( gravForces[ j ] * midPts[ j ] ) 
 
-        torques[ i ] += ( gripperForce * positionPoints[ i ][0][3] ) 
+        torques[ i ] += ( gripperForce * positionPoints[ i ][0][3] ) #add the torque of the 5kg mass the arm holds
 
-    finalTorque = math.sqrt( torques[ 0 ]**2 + torques[ 1 ]**2 + torques[ 2 ]**2 )
+    #calculate the total torque of all 3 positions combined
+    finalTorque = math.sqrt( torques[ 0 ]**2 + torques[ 1 ]**2 + torques[ 2 ]**2 ) 
+
+    #print the torques and points for all positions
     print( "Position 1 torque", torques[0] )
     print( "Position 2 torque", torques[1] )
     print( "Position 3 torque", torques[2] )
-    print("\n")
+    print("")
+    print(armLengths)
+    print()
     for i in range(len(positionPoints)):
         print("Position " + str(i+1) + ":")
         print("Origin: (" + str(positionPoints[i][0][0]) + "," + str(positionPoints[i][1][0])+ ")")
@@ -110,39 +116,32 @@ def calculateTorque2( armLengths ):
         print("B: (" + str(positionPoints[i][0][2]) + "," + str(positionPoints[i][1][2])+ ")")
         print("C: (" + str(positionPoints[i][0][3]) + "," + str(positionPoints[i][1][3])+ ")")
         print("\n")
+        print("Final Torque:" + str(finalTorque))
+        print()
     return finalTorque
 
-testLengths = [ 0.5, 0.6, 0.3 ]
+# best lengths tested (to plot) 
+testLengths = [0.9672434657367032, 0.6012485386425627, 0.8017252288850533]
 fTorque = calculateTorque2(testLengths)
 print("Final combined torque", fTorque)
 
+#Linear constraints and bounds 
+cnstrnts = LinearConstraint( [ [ 1, 1, 1 ], [ -1, 1, 0 ] ], [ 1, 0 ], [ np.Inf, 0.1 ], keep_feasible=True )
+bnds = Bounds( [ 0, 0, 0 ], [ 10,10,10 ], keep_feasible=True)
 
-
-# test = calculateTorque2(testLengths)
-# print("Torque of all positions combined", test)
-
-cnstrnts = LinearConstraint( [ [ 1, 1, 1 ], [ 1, -1, 0 ] ], [ 1, -0.1 ], [ np.Inf, 1.9 ], keep_feasible=True )
-
-
-bnds = Bounds( [ 0, 0, 0 ], [ np.Inf, np.Inf, 0.3 ], keep_feasible=True)
-
-
-results = scipy.optimize.minimize( calculateTorque2, testLengths, method="trust-constr", bounds=bnds, constraints=cnstrnts ) # options={'maxiter':1000})
-
-print(results)
-
-
-plt.xlim = 0.9
+#set plot limits and apply a grid
+plt.xlim = 0.9 
 plt.ylim = 0.9
 plt.grid()
 
-
+#round points to make graph less crowded when plotting
 for i in range(len(positionPoints)):
     for j in range(3):
         x = round(positionPoints[i][0][j+1],2)
         y = round(positionPoints[i][1][j+1],2)
         plt.text(positionPoints[i][0][j+1], positionPoints[i][1][j+1], "("+str(x)+","+str(y)+")")
 
+#plot points, ensure axes are equal and make the legend visible
 plt.plot( positionPoints[0][0], positionPoints[0][1], label = "Pos 1")
 plt.plot( positionPoints[1][0], positionPoints[1][1], label = "Pos 2")
 plt.plot( positionPoints[2][0], positionPoints[2][1], label = "Pos 3")
