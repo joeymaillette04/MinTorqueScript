@@ -99,7 +99,17 @@ def calculateTorque2( armLengths ):
         torques[ i ] += ( gripperForce * positionPoints[ i ][0][3] ) 
 
     finalTorque = math.sqrt( torques[ 0 ]**2 + torques[ 1 ]**2 + torques[ 2 ]**2 )
-    print( "Position 1 torque", torques[0] )    
+    print( "Position 1 torque", torques[0] )
+    print( "Position 2 torque", torques[1] )
+    print( "Position 3 torque", torques[2] )
+    print("\n")
+    for i in range(len(positionPoints)):
+        print("Position " + str(i+1) + ":")
+        print("Origin: (" + str(positionPoints[i][0][0]) + "," + str(positionPoints[i][1][0])+ ")")
+        print("A: (" + str(positionPoints[i][0][1]) + "," + str(positionPoints[i][1][1])+ ")")
+        print("B: (" + str(positionPoints[i][0][2]) + "," + str(positionPoints[i][1][2])+ ")")
+        print("C: (" + str(positionPoints[i][0][3]) + "," + str(positionPoints[i][1][3])+ ")")
+        print("\n")
     return finalTorque
 
 testLengths = [ 0.4, 0.4, 0.3 ]
@@ -127,7 +137,7 @@ cnstrnts = LinearConstraint( [ [ 1, 1, 1 ], [ -1, 1, 0 ] ], [ 1, 0 ], [ np.Inf, 
 bnds = Bounds( [ 0, 0, 0 ], [ 0.6, 0.5, 0.4 ], keep_feasible=True)
 
 
-results = scipy.optimize.minimize( calculateTorque2, testLengths, method="trust-constr", bounds=bnds, constraints=cnstrnts ) # options={'maxiter':1000})
+#results = scipy.optimize.minimize( calculateTorque2, testLengths, method="trust-constr", bounds=bnds, constraints=cnstrnts ) # options={'maxiter':1000})
 
 # print(results)
 
@@ -145,6 +155,12 @@ plt.grid()
 
 # plt.axes.Axes.set_aspect
 # plt.set_aspect('equal', adjustable='datalim') 
+
+for i in range(len(positionPoints)):
+    for j in range(3):
+        x = round(positionPoints[i][0][j+1],2)
+        y = round(positionPoints[i][1][j+1],2)
+        plt.text(positionPoints[i][0][j+1], positionPoints[i][1][j+1], "("+str(x)+","+str(y)+")")
 
 plt.plot( positionPoints[0][0], positionPoints[0][1], label = "Pos 1")
 plt.plot( positionPoints[1][0], positionPoints[1][1], label = "Pos 2")
