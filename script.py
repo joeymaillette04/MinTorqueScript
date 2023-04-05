@@ -1,5 +1,7 @@
 import math
+import matplotlib.axes as ax
 import matplotlib.pyplot as plt 
+
 import numpy as np
 import scipy.optimize._minimize
 from scipy.optimize import Bounds
@@ -125,7 +127,7 @@ cnstrnts = LinearConstraint( [ [ 1, 1, 1 ], [ -1, 1, 0 ] ], [ 1, 0 ], [ np.Inf, 
 bnds = Bounds( [ 0, 0, 0 ], [ 0.6, 0.5, 0.4 ], keep_feasible=True)
 
 
-# results = scipy.optimize.minimize( calculateTorque2, testLengths, method="trust-constr", bounds=bnds, constraints=cnstrnts ) # options={'maxiter':1000})
+results = scipy.optimize.minimize( calculateTorque2, testLengths, method="trust-constr", bounds=bnds, constraints=cnstrnts ) # options={'maxiter':1000})
 
 # print(results)
 
@@ -147,6 +149,7 @@ plt.grid()
 plt.plot( positionPoints[0][0], positionPoints[0][1], label = "Pos 1")
 plt.plot( positionPoints[1][0], positionPoints[1][1], label = "Pos 2")
 plt.plot( positionPoints[2][0], positionPoints[2][1], label = "Pos 3")
+plt.axis('equal')
 plt.legend()
 plt.show() 
 
