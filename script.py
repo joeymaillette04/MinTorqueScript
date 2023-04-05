@@ -112,7 +112,7 @@ def calculateTorque2( armLengths ):
         print("\n")
     return finalTorque
 
-testLengths = [ 0.4, 0.4, 0.3 ]
+testLengths = [ 0.5, 0.6, 0.3 ]
 fTorque = calculateTorque2(testLengths)
 print("Final combined torque", fTorque)
 
@@ -121,40 +121,21 @@ print("Final combined torque", fTorque)
 # test = calculateTorque2(testLengths)
 # print("Torque of all positions combined", test)
 
-
-# def lengthConstr( inputLens ):
-#     return inputLens[0] + inputLens[1] + inputLens[2]
-
-# constrMax = NonlinearConstraint(lengthConstr, 1, np.Inf, keep_feasible=True)
+cnstrnts = LinearConstraint( [ [ 1, 1, 1 ], [ 1, -1, 0 ] ], [ 1, -0.1 ], [ np.Inf, 1.9 ], keep_feasible=True )
 
 
-# def checkInter( inputLengths ):
-#     return inputLengths[0] - inputLengths[1]
-
-cnstrnts = LinearConstraint( [ [ 1, 1, 1 ], [ -1, 1, 0 ] ], [ 1, 0 ], [ np.Inf, 0.1 ], keep_feasible=True )
+bnds = Bounds( [ 0, 0, 0 ], [ np.Inf, np.Inf, 0.3 ], keep_feasible=True)
 
 
-bnds = Bounds( [ 0, 0, 0 ], [ 0.6, 0.5, 0.4 ], keep_feasible=True)
+results = scipy.optimize.minimize( calculateTorque2, testLengths, method="trust-constr", bounds=bnds, constraints=cnstrnts ) # options={'maxiter':1000})
 
+print(results)
 
-#results = scipy.optimize.minimize( calculateTorque2, testLengths, method="trust-constr", bounds=bnds, constraints=cnstrnts ) # options={'maxiter':1000})
-
-# print(results)
-
-# finalLens = results.x
-
-# print(finalLens[2])
 
 plt.xlim = 0.9
 plt.ylim = 0.9
 plt.grid()
 
-# fig = plt.figure()
-# ax = fig.add_subplot(111)
-# ax.set_aspect('equal', adjustable='box')
-
-# plt.axes.Axes.set_aspect
-# plt.set_aspect('equal', adjustable='datalim') 
 
 for i in range(len(positionPoints)):
     for j in range(3):
@@ -168,9 +149,3 @@ plt.plot( positionPoints[2][0], positionPoints[2][1], label = "Pos 3")
 plt.axis('equal')
 plt.legend()
 plt.show() 
-
-
-# def checkY( inputLengths ):
-#     return inputLengths[2]
-# constrY = NonlinearConstraint(checkY, [ 0, 0, 0 ], [ np.Inf, np.Inf, 0.6 ], keep_feasible=True)
-#NonlinearConstraint( checkInter, -3, 3, keep_feasible=True )
