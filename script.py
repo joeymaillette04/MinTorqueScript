@@ -121,15 +121,16 @@ def calculateTorque2( armLengths ):
     return finalTorque
 
 # best lengths tested (to plot) 
-testLengths = [ 0.5, 0.5, 0.5 ]
+testLengths = [ 1.8, 2, 0.2 ]
 # testLengths = [0.9672434657367032, 0.6012485386425627, 0.8017252288850533]
 fTorque = calculateTorque2(testLengths)
 print("Final combined torque", fTorque)
 
 #Linear constraints and bounds 
-cnstrnts = LinearConstraint( [ [ 1, 1, 1 ], [ -1, 1, 0 ] ], [ 1, 0 ], [ np.Inf, 0.1 ], keep_feasible=True )
+cnstrnts = LinearConstraint( [ [ 1, 1, 1 ], [ -1, 1, 0 ], [ 0, 0, 1] ], [ 1, -0.3, 0 ], [ np.Inf, 0.3, 0.35 ], keep_feasible=True )
 bnds = Bounds( [ 0, 0, 0 ], [ 10,10,10 ], keep_feasible=True)
-
+results = scipy.optimize.minimize(calculateTorque2, testLengths, method="trust-constr", bounds=bnds, constraints=cnstrnts, options={"maxiter" : 10000})
+print(results)
 #set plot limits and apply a grid
 plt.xlim = 0.9 
 plt.ylim = 0.9
