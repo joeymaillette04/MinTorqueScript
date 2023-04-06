@@ -6,8 +6,9 @@ global trials, iterations, tweak
 
 # trials*iterations is the total number of times the "good" values are refined
 trials = 100000
-iterations = 30
-tweak = 0.02
+iterations = 50
+tweak = 0.005
+
 
 def runTests(numIterations, lone, ltwo, lthree, count, passedTorque):
 
@@ -40,7 +41,7 @@ def runTests(numIterations, lone, ltwo, lthree, count, passedTorque):
         try:
             resultsTorque.append(calculateTorque2(testLengths))
         except:
-            resultsTorque.append(10000)
+            resultsTorque.append(errorConst)
 
         resultsYVal1.append(positionPoints[0][1][1])
         resultsYVal2.append(positionPoints[0][1][2])
@@ -57,7 +58,7 @@ def runTests(numIterations, lone, ltwo, lthree, count, passedTorque):
             if (resultsTorque[i] < resultsTorque[minTorqueIndex]):
                 minTorqueIndex = i
         else:
-            resultsTorque[i] = 10000
+            resultsTorque[i] = errorConst
         
     # output best lengths and torque for this iteration
     print(resultsLen[minTorqueIndex])
@@ -76,5 +77,4 @@ def runMoreTests(newLengths, count, passedTorque):
     runTests(trials,newLengths[0],newLengths[1],newLengths[2], count, passedTorque)
 
 # function call (input the three middle values)
-runTests(trials,0.9684249594628851, 0.6007888013968402 , 0.8038981272930561, 0, 50 )
-
+#runTests(trials, 1.066876903993271, 1.0501579075251466, 0.6433084769483223, 0, 50 )

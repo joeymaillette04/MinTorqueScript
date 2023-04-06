@@ -7,10 +7,20 @@ import scipy.optimize._minimize
 from scipy.optimize import Bounds
 from scipy.optimize import NonlinearConstraint
 from scipy.optimize import LinearConstraint
+from shapely.geometry import LineString
 
-global positionPoints
+
+global positionPoints, errorConst
 
 positionPoints = [ [ [0, 0, 0, 0.75], [0, 0, 0, 0.1] ], [ [0, 0, 0, 0.5], [0, 0, 0, 0.5] ], [ [0, 0, 0, 0.2], [0, 0, 0, 0.6] ] ]
+errorConst = 99999
+
+def ccw(A,B,C):
+    return (C.y-A.y) * (B.x-A.x) > (B.y-A.y) * (C.x-A.x)
+
+# Return true if line segments AB and CD intersect
+def intersect(A,B,C,D):
+    return ccw(A,C,D) != ccw(B,C,D) and ccw(A,B,C) != ccw(A,B,D)
 
 
 def get_intersections(x0, y0, r0, x1, y1, r1):
@@ -52,12 +62,11 @@ def mass( p, l ): #calculates mass of each arm based on length and its density
 def force( aMass ): #calculates force using mass and gravity constant (9.81N/kG)
     return aMass * 9.81
 
-
 def calculateTorque2( armLengths ):
-    # gripperPts= [ [ 0.75, 0.1 ], [ 0.5, 0.5 ], [ 0.2, 0.6 ] ]
     gripperForce = 5 * 9.81
     gripperAngles = [ -math.pi/3.0 , 0, math.pi/4.0 ]
     torques = [ 0, 0, 0 ]
+    intersections = []
 
     for i in range( 3 ): #iterates once for each position the arm must reach
         positionPoints[ i ][ 0 ][ 2 ] = positionPoints[ i ][ 0 ][3] - (armLengths[ 2 ] * abs(math.cos(gripperAngles[ i ])))
@@ -93,6 +102,12 @@ def calculateTorque2( armLengths ):
             midPts[0] = calcMidPt( 0, x2 )
             midPts[1] = calcMidPt( x2, positionPoints[i][0][2] )
 
+        #creates two line segments and checks if they intersect (only checks first and third lengths)
+        Segment1 = LineString([(0,0), (positionPoints[i][0][1], positionPoints[i][1][1])])
+        Segment2 = LineString([(positionPoints[i][0][2], positionPoints[i][1][2]), (positionPoints[i][0][3], positionPoints[i][1][3])])
+
+        #array of true or falses for intersection
+        intersections.append(Segment1.intersects(Segment2))
 
         for j in range( 0, 3): #Add all the torque required for the three arms
             torques[ i ] += ( gravForces[ j ] * midPts[ j ] ) 
@@ -118,19 +133,26 @@ def calculateTorque2( armLengths ):
         print("\n")
         print("Final Torque:" + str(finalTorque))
         print()
+
+    #if in any of the positions have intersecting lines output a high error torque
+    for i in range(3):
+        if(intersections[i] == True):
+            finalTorque = errorConst
+
     return finalTorque
 
 # best lengths tested (to plot) 
-testLengths = [ 1.8, 2, 0.2 ]
-# testLengths = [0.9672434657367032, 0.6012485386425627, 0.8017252288850533]
+testLengths = [1.0821468359052653, 1.0641662437491748, 0.6427511332656937]
 fTorque = calculateTorque2(testLengths)
 print("Final combined torque", fTorque)
 
 #Linear constraints and bounds 
 cnstrnts = LinearConstraint( [ [ 1, 1, 1 ], [ -1, 1, 0 ], [ 0, 0, 1] ], [ 1, -0.3, 0 ], [ np.Inf, 0.3, 0.35 ], keep_feasible=True )
 bnds = Bounds( [ 0, 0, 0 ], [ 10,10,10 ], keep_feasible=True)
-results = scipy.optimize.minimize(calculateTorque2, testLengths, method="trust-constr", bounds=bnds, constraints=cnstrnts, options={"maxiter" : 10000})
-print(results)
+
+#results = scipy.optimize.minimize(calculateTorque2, testLengths, method="trust-constr", bounds=bnds, constraints=cnstrnts, options={"maxiter" : 10000})
+#print(results)
+
 #set plot limits and apply a grid
 plt.xlim = 0.9 
 plt.ylim = 0.9
