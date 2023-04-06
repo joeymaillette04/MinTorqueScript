@@ -1,7 +1,5 @@
-import scipy.optimize._minimize
-import matplotlib.pyplot as plt 
-import numpy as np
 from script import *
+
 global trials, iterations, tweak
 
 # trials*iterations is the total number of times the "good" values are refined
