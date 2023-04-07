@@ -30,13 +30,16 @@ In order to develop this optimization script, we have utilized various python fr
 * ![SciPy](https://img.shields.io/badge/SciPy-%230C55A5.svg?style=for-the-badge&logo=scipy&logoColor=%white)
 * ![Matplotlib](https://img.shields.io/badge/Matplotlib-%23ffffff.svg?style=for-the-badge&logo=Matplotlib&logoColor=black)
 
-Additional information about the project can be found in the [Report](do later).
+Additional information about the project can be found in the [Report](https://github.com/csabahi/MinTorqueScript/blob/main/TorqueReport.pdf).
 
 ## Solution
-The program was run with an initial guess of [1, 1, 0.5], the SciPy optimization function took 31 iterations to refine the value's of the lengths (optimized torque ≈ 43Nm) which were then passed to TestAlgorithm.py where the values were fine-tuned to precisely [0.9672434657367032, 0.6012485386425627, 0.8017252288850533] with a final combined torque of 41.0742Nm.
+The program was run with an initial guess of [1, 1, 0.5], the SciPy optimization function took 31 iterations to refine the value's of the lengths (optimized torque ≈ 35Nm) which were then passed to TestAlgorithm.py where the values were fine-tuned to precisely: 
 
-![image](https://user-images.githubusercontent.com/71158927/230139508-4dd4ff12-5daa-45d1-8666-8cb9568cb98e.png)
+[1.0821468359052653, 1.0641662437491748, 0.6427511332656937] 
 
+with a final combined torque of 32.872Nm.
+
+![image](https://user-images.githubusercontent.com/71158927/230661833-93182f1e-7dbd-421c-811d-3c361726b79e.png)
 
 ## Contributors
 
