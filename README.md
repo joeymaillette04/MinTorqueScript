@@ -30,7 +30,7 @@ In order to develop this optimization script, we have utilized various python fr
 * ![SciPy](https://img.shields.io/badge/SciPy-%230C55A5.svg?style=for-the-badge&logo=scipy&logoColor=%white)
 * ![Matplotlib](https://img.shields.io/badge/Matplotlib-%23ffffff.svg?style=for-the-badge&logo=Matplotlib&logoColor=black)
 
-Additional information about the project can be found in the [Report](https://github.com/csabahi/MinTorqueScript/blob/main/TorqueReport.pdf).
+Additional information about the project can be found in the [Report](https://github.com/joeymaillette04/MinTorqueScript/blob/main/TorqueReport.pdf).
 
 ## Solution
 The program was run with an initial guess of [1, 1, 0.5], the SciPy optimization function took 31 iterations to refine the value's of the lengths (optimized torque ≈ 35Nm) which were then passed to TestAlgorithm.py where the values were fine-tuned to precisely: 
